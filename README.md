@@ -1,154 +1,94 @@
+# PHP Translation System
 
-# php translation system
+A simple, file-based translation system for PHP projects. This system allows you to easily manage and display translated content in your web application.
 
+## Project Structure
 
-## How Use :
+The project is organized into two main directories:
 
-**Add setup_public.php into the file you want to translate into**
+- `public/`: This directory contains the public-facing files of your application, such as `index.php`. It serves as the web root.
+- `src/`: This directory contains the core application logic, including the `Translator` class, configuration, and translation files.
 
-    require  'language/setup_public.php';
+```
+/
+|-- public/
+|   `-- index.php
+|-- src/
+|   |-- translations/
+|   |   |-- en.php
+|   |   `-- fr.php
+|   |-- config.php
+|   `-- Translator.php
+`-- README.md
+```
 
-**Define it in a file**
+## How to Use
 
-    $translator = new  Translator();
-    $tr = $translator->getTranslations();
+### 1. Include the Translator
 
-## **How to use translation**
+To use the translation system, you first need to include the `Translator.php` file in your project. This is typically done at the beginning of your main application file (e.g., `public/index.php`).
 
-**Add key and word in translations/lang.php**
+```php
+require_once __DIR__ . '/../src/Translator.php';
+```
 
-**Example :**
-translations/fr.php
+### 2. Instantiate the Translator
 
+Next, create an instance of the `Translator` class and retrieve the translations for the current language.
+
+```php
+$translator = new Translator();
+$tr = $translator->getTranslations();
+```
+
+The `Translator` class automatically detects the user's language from the `lang` query parameter in the URL (e.g., `index.php?lang=fr`) or from a cookie. If no language is specified, it uses the default language defined in `src/config.php`.
+
+### 3. Display Translated Content
+
+You can now use the `$tr` array to display translated strings in your HTML.
+
+```php
+<h1><?php echo $tr['my_account']; ?></h1>
+<p><?php echo $tr['email']; ?></p>
+```
+
+## Adding a New Language
+
+To add a new language, follow these steps:
+
+1.  **Create a new translation file.** In the `src/translations/` directory, create a new PHP file named after the language code (e.g., `es.php` for Spanish).
+
+2.  **Add the translation strings.** The file should contain an array named `$_TRANSLATIONS` with the translated strings. At a minimum, you should include the `LANGUAGE_NAME`, `LANGUAGE_CODE`, and `directory` (either `ltr` for left-to-right or `rtl` for right-to-left).
+
+    **Example: `src/translations/es.php`**
+
+    ```php
     <?php
-    
     $_TRANSLATIONS = array (
-    
-    'LANGUAGE_NAME' => 'française',    
-    'LANGUAGE_CODE' => 'fr',
-    'directory' => 'ltr',
-         
-    'email' => 'E-mail',
-	'phone' => 'Numéro de téléphone',
-	'my_account' => 'Mon compte',
-	'logout' => 'Se déconnecter',
-	'manage_my_account' => 'Gérer mon compte',
-
-
-
-index.php add
-
-    <?=$tr['phone'];?>
-    
-    <label  for="phone"><?=$tr['phone'];?>:</label>
-
-# Add a new language
-
-
-**Add a file in a folder
-translations/
-It is an example language code**
-en.php
-fr.php
-ar.php
-
-**Add to him**
-
-    <?php
-    
-    $_TRANSLATIONS = array (
-    
-    'LANGUAGE_NAME' => 'française', //<= Language name
-    
-    'LANGUAGE_CODE' => 'fr', //<= Language code
-    
-    'directory' => 'ltr', //<= Left to Right (ltr) or Right to Left (rtl)
-
-
-# Setting the default language
-
-**Edit the config.php file**
-
-    <?php
-    
-    $_CONFIG = array (
-    
-    'lang_default' => 'fr',
-    
+      'LANGUAGE_NAME' => 'Español',
+      'LANGUAGE_CODE' => 'es',
+      'directory' => 'ltr',
+      'my_account' => 'Mi cuenta',
+      'email' => 'Correo electrónico',
+      // ... other translations
     );
-
-
-**If you want to change between existing languages
-You can use a code**
-
-    <?php
-    
-    $translations_dir = 'include/language/translations/'; // Directory where the translation files are stored
-    
-    $translations_files = scandir($translations_dir);
-    
-    $translations = array();
-    
-    $lang = isset($_GET['lang']) ? $_GET['lang'] : (isset($_COOKIE['lang']) ? $_COOKIE['lang'] : null);
-    
-    foreach ($translations_files as $file) {
-    
-    if ($file !== '.' && $file !== '..') {
-    
-    include  $translations_dir  .  $file;
-    
-    $language_name = $_TRANSLATIONS['LANGUAGE_NAME'];
-    
-    $language_code = $_TRANSLATIONS['LANGUAGE_CODE'];
-    
-    $translations[$language_code] = $language_name;
-    
-    }
-    
-    }
-    
     ?>
+    ```
 
-    <li  class="nav-item dropdown no-arrow mx-1">
-    
-    <a  class="nav-link dropdown-toggle"  href="#"  id="alertsDropdown"  role="button"  data-toggle="dropdown"  aria-haspopup="true"  aria-expanded="false">
-    
-    <i  class="fas fa-globe fa-fw"></i>  <?=  $tr['LANGUAGE_NAME'] ?>
-    
-    </a>
-    
-    <!-- Dropdown - Alerts -->
-    
-    <div  class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"  aria-labelledby="alertsDropdown">
-    
-    <?php
-    
-    $query_string = $_SERVER['QUERY_STRING'];
-    
-    $current_url = $_SERVER['REQUEST_URI'];
-    
-    foreach ($translations as $key => $value) {
-    
-    $lang_param = ($query_string ? '&' : '?') .  'lang='  .  $key;
-    
-    $new_url = $current_url  .  $lang_param;
-    
-    ?>
-    
-    <a  class="dropdown-item d-flex align-items-center"  href="<?=$new_url?>">
-    
-    <?=$value?>
-    
-    </a>
-    
-    <?php
-    
-    };
-    
-    ?>
-    
-    </div>
-    
-    </li>
+The new language will be automatically detected by the `Translator` class.
 
+## Configuration
 
+The default language can be set in the `src/config.php` file.
+
+```php
+<?php
+$_CONFIG = array (
+  'lang_default' => 'en',
+);
+?>
+```
+
+## Contributing
+
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
